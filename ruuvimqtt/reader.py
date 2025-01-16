@@ -24,12 +24,15 @@ influx_password = "Rc20213005#"
 influx_database = "ruuvi"
 
 # set logging
+fmt = logging.Formatter("%(name)s: %(asctime)s | %(levelname)s | %(filename)s:%(lineno)s | %(process)d >>> %(message)s")
 logger = logging.getLogger("ruuviMQTT")
 logFileHandler =logging.FileHandler("ruuviMQTT.log")
 logFileHandler.setLevel(logging.DEBUG)
+logFileHandler.setFormatter(fmt)
 logger.addHandler(logFileHandler)
 logConsoleHandler =logging.StreamHandler(stream=sys.stdout)
 logConsoleHandler.setLevel(logging.DEBUG)
+logConsoleHandler.setFormatter(fmt)
 logger.addHandler(logConsoleHandler)
 
 # my sensors
