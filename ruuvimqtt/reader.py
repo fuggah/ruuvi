@@ -123,18 +123,16 @@ def on_message(client, userdata, msg):
 				if my_sensor is not None:
 					print(f"Sender = '{my_sensor}', Data = '{data}'")
 
-					my_datenow =gmtime()
+					my_datenow =gmtime().tm_min
 					my_sensordate =last_times[my_sensor]
 
 					print(f"my_datenow ='{my_datenow}', my_sensordate ='{my_sensordate}'")
 					do_write =False
 
-					if my_sensordate is None:
+					if my_datenow -my_sensordate >1:
 						do_write =True
-					else:
-						if my_datenow -my_sensordate >6000:
-							do_write =True
-							last_times[my_sensor] =my_datenow
+						last_times[my_sensor] =my_datenow
+
 					if True ==do_write:
 						write_to_influx(my_sensor, data)
 
