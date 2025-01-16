@@ -25,7 +25,7 @@ sensors = {"C0:E7:B2:DD:8B:1A" : "Fence",
 	"EC:07:DA:3E:5F:F2" : "Freezer",
 	"D6:EC:67:41:9D:76" : "Fridge" }
 
-last_times = { }
+last_times = { "Fence" : 0, "Mobile" : 0, "Freezer" : 0, "Fridge" : 0 } 
 
 measurement = [{"measurement": "ruuvi_measurements",
 	"tags": {
