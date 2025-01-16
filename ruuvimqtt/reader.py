@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!python3
 # python3.6
 
 import random
