@@ -6,7 +6,7 @@ from ruuvi_decoders import Df3Decoder, Df5Decoder
 from json import dumps, loads
 from paho.mqtt import client as mqtt_client
 from influxdb import InfluxDBClient
-from datetime import datetime
+from datetime import date
 from time import gmtime
 
 broker = "localhost"
