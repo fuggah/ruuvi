@@ -137,6 +137,7 @@ def on_message(client, userdata, msg):
 						last_times[my_sensor] =my_datenow
 
 					if True ==do_write:
+						print("WRITING TO INFLUX")
 						write_to_influx(my_sensor, data)
 
 		except (AttributeError, ValueError, TypeError):
