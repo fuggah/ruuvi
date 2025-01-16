@@ -26,6 +26,7 @@ influx_database = "ruuvi"
 # set logging
 fmt = logging.Formatter("%(name)s: %(asctime)s | %(levelname)s | %(filename)s:%(lineno)s | %(process)d >>> %(message)s")
 logger = logging.getLogger("ruuviMQTT")
+logger.setLevel(logging.DEBUG)
 logFileHandler =logging.FileHandler("ruuviMQTT.log")
 logFileHandler.setLevel(logging.DEBUG)
 logFileHandler.setFormatter(fmt)
