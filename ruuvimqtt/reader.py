@@ -141,7 +141,7 @@ def on_message(client, userdata, msg):
 					time_diff =(my_datenow -my_sensordate).total_seconds()
 					print(f"my_datenow ='{my_datenow}', my_sensordate ='{my_sensordate}', time_diff ='{time_diff}")
 
-					if abs(time_diff) >180:
+					if abs(time_diff) >writing_time:
 						do_write =True
 						last_times[my_sensor] =my_datenow
 
