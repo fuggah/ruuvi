@@ -4,7 +4,7 @@
 import random
 from ruuvi_decoders import Df3Decoder, Df5Decoder
 from json import dumps, loads
-from libpaho_mqtt import client as mqtt_client
+from paho.mqtt import client as mqtt_client
 from influxdb import InfluxDBClient
 from datetime import datetime
 from time import gmtime
