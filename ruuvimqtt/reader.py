@@ -25,7 +25,7 @@ sensors = {"C0:E7:B2:DD:8B:1A" : "Fence",
 	"EC:07:DA:3E:5F:F2" : "Freezer",
 	"D6:EC:67:41:9D:76" : "Fridge" }
 
-last_times = { "Fence" : 0, "Mobile" : 0, "Freezer" : 0, "Fridge" : 0 } 
+last_times = { "Fence" : gmtime(), "Mobile" : gmtime(), "Freezer" : gmtime(), "Fridge" : gmtime() } 
 
 measurement = [{"measurement": "ruuvi_measurements",
 	"tags": {
@@ -123,13 +123,15 @@ def on_message(client, userdata, msg):
 				if my_sensor is not None:
 					print(f"Sender = '{my_sensor}', Data = '{data}'")
 
-					my_datenow =gmtime().tm_min
+					my_datenow =gmtime()
 					my_sensordate =last_times[my_sensor]
 
 					print(f"my_datenow ='{my_datenow}', my_sensordate ='{my_sensordate}'")
 					do_write =False
+					time_diff =(my_datenow -my_sensordate).minutes
+					print(f"my_datenow ='{my_datenow}', my_sensordate ='{my_sensordate}', time_diff ='{time_diff}")
 
-					if my_datenow -my_sensordate >1:
+					if abs(time_diff) >1:
 						do_write =True
 						last_times[my_sensor] =my_datenow
 
