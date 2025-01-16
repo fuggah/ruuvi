@@ -9,6 +9,8 @@ from influxdb import InfluxDBClient
 import datetime
 from datetime import date
 from time import gmtime
+import logging
+import sys
 
 broker = "localhost"
 port = 1883
@@ -20,6 +22,15 @@ influx_port = "8086"
 influx_user = "ruuvicollector"
 influx_password = "Rc20213005#"
 influx_database = "ruuvi"
+
+# set logging
+logger = logging.getLogger("ruuviMQTT")
+logFileHandler =logging.FileHandler("ruuviMQTT.log")
+logFileHandler.setLevel(logging.DEBUG)
+logger.addHandler(logFileHandler)
+logConsoleHandler =logging.StreamHandler(stream=sys.stdout)
+logConsoleHandler.setLeverl(logging.DEBUG)
+logger.addHandler(logConsoleHandler)
 
 # my sensors
 sensors = {"C0:E7:B2:DD:8B:1A" : "Fence",
@@ -92,12 +103,12 @@ def write_to_influx(my_sensor = None, data =None):
 		measurement[0]['fields']['temperature'] =data['temperature']
 		measurement[0]['fields']['txPower'] =data['tx_power']
 
-		print(f"'{measurement}'")
+		logger.debug(f"'{measurement}'")
 
 		dbClient.write_points(measurement)
 
 	except(KeyError):
-		print(f"Exception --> {KeyError}")
+		logger.error(f"Exception --> {KeyError}")
 
 # there may be other ruuvi devices around and I don't wnat them to mess this script
 # so filter out those
@@ -106,13 +117,13 @@ def is_my_sensor(mac):
 	try:
 		sensor =sensors[mac]
 	except(NameError):
-		print(f"exception --> {NameError}")
+		logger.error(f"exception --> {NameError}")
 
 	return sensor
 
 # this is called every time in client.loop_forever when the subscribed message has been read from mq
 def on_message(client, userdata, msg):
-	print(f"Received '{msg.payload.decode()}' from '{msg.topic}' topic")
+	logger.debug(f"Received '{msg.payload.decode()}' from '{msg.topic}' topic")
 	data = loads(msg.payload.decode())
 	data =data.get("data")
 	if data is not None:
@@ -132,33 +143,33 @@ def on_message(client, userdata, msg):
 				sender = msg.topic.split(topic_prefix +"/")[1]
 				my_sensor =is_my_sensor(sender)
 				if my_sensor is not None:
-					print(f"Sender = '{my_sensor}', Data = '{data}'")
+					logger.debug(f"Sender = '{my_sensor}', Data = '{data}'")
 
 					my_datenow =datetime.datetime.now()
 					my_sensordate =last_times[my_sensor]
 
 					do_write =False
 					time_diff =(my_datenow -my_sensordate).total_seconds()
-					print(f"my_datenow ='{my_datenow}', my_sensordate ='{my_sensordate}', time_diff ='{time_diff}")
+					logger.debug(f"my_datenow ='{my_datenow}', my_sensordate ='{my_sensordate}', time_diff ='{time_diff}")
 
 					if abs(time_diff) >writing_time:
 						do_write =True
 						last_times[my_sensor] =my_datenow
 
 					if True ==do_write:
-						print("WRITING TO INFLUX")
+						logger.info(f"WRITING TO INFLUX: {data}")
 						write_to_influx(my_sensor, data)
 
 		except (AttributeError, ValueError, TypeError):
-			print(f"Error --> {msg.payload}")
+			logger.error(f"Error --> {msg.payload}")
 
 
 def connect_mqtt() -> mqtt_client:
     def on_connect(client, userdata, flags, rc):
         if rc == 0:
-            print("DEBUG: Connected to MQTT Broker!")
+            logger.debug("Connected to MQTT Broker!")
         else:
-            print("ERROR: Failed to connect, return code %d\n", rc)
+            logger.error("Failed to connect, return code %d\n", rc)
 
     client = mqtt_client.Client(client_id)
     client.username_pw_set(username, password)
