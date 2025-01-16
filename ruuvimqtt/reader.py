@@ -139,7 +139,7 @@ def on_message(client, userdata, msg):
 						write_to_influx(my_sensor, data)
 
 		except (AttributeError, ValueError, TypeError):
-			log.warning(f"Error --> {msg.payload}")
+			print(f"Error --> {msg.payload}")
 
 
 def connect_mqtt() -> mqtt_client:
