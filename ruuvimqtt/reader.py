@@ -21,14 +21,21 @@ influx_user = "ruuvicollector"
 influx_password = "Rc20213005#"
 influx_database = "ruuvi"
 
+# my sensors
 sensors = {"C0:E7:B2:DD:8B:1A" : "Fence",
 	"D9:27:7C:28:2F:E6" : "Mobile",
 	"EC:07:DA:3E:5F:F2" : "Freezer",
 	"D6:EC:67:41:9D:76" : "Fridge" }
 
 just_now =datetime.datetime.now()
+
+# write every this second
+writing_time  =60
+
+# initial writing times
 last_times = { "Fence" :just_now, "Mobile" : just_now, "Freezer" : just_now, "Fridge" : just_now } 
 
+# initial measurement
 measurement = [{"measurement": "ruuvi_measurements",
 	"tags": {
 		"dataFormat": 0,
@@ -92,6 +99,8 @@ def write_to_influx(my_sensor = None, data =None):
 	except(KeyError):
 		print(f"Exception --> {KeyError}")
 
+# there may be other ruuvi devices around and I don't wnat them to mess this script
+# so filter out those
 def is_my_sensor(mac):
 	sensor = None
 	try:
@@ -101,7 +110,7 @@ def is_my_sensor(mac):
 
 	return sensor
 
-
+# this is called every time in client.loop_forever when the subscribed message has been read from mq
 def on_message(client, userdata, msg):
 	print(f"Received '{msg.payload.decode()}' from '{msg.topic}' topic")
 	data = loads(msg.payload.decode())
@@ -159,9 +168,6 @@ def connect_mqtt() -> mqtt_client:
 
 
 def subscribe(client: mqtt_client):
-   clientdata =None
-#    def on_message(client, userdata, msg):
-#        print(f"Received `{msg.payload.decode()}` from `{msg.topic}` topic")
    client.subscribe(topic_prefix + "/+")
    client.on_message = on_message
 
