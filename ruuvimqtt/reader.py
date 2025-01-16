@@ -6,6 +6,7 @@ from ruuvi_decoders import Df3Decoder, Df5Decoder
 from json import dumps, loads
 from paho.mqtt import client as mqtt_client
 from influxdb import InfluxDBClient
+import datetime
 from datetime import date
 from time import gmtime
 
@@ -25,7 +26,8 @@ sensors = {"C0:E7:B2:DD:8B:1A" : "Fence",
 	"EC:07:DA:3E:5F:F2" : "Freezer",
 	"D6:EC:67:41:9D:76" : "Fridge" }
 
-last_times = { "Fence" : gmtime(), "Mobile" : gmtime(), "Freezer" : gmtime(), "Fridge" : gmtime() } 
+just_now =datetime.datetime.now(datetime.UTC)
+last_times = { "Fence" :just_now, "Mobile" : just_now, "Freezer" : just_now, "Fridge" : just_now } 
 
 measurement = [{"measurement": "ruuvi_measurements",
 	"tags": {
@@ -123,15 +125,14 @@ def on_message(client, userdata, msg):
 				if my_sensor is not None:
 					print(f"Sender = '{my_sensor}', Data = '{data}'")
 
-					my_datenow =gmtime()
+					my_datenow =datetime.datetime.now(datetime.UTC)
 					my_sensordate =last_times[my_sensor]
 
-					print(f"my_datenow ='{my_datenow}', my_sensordate ='{my_sensordate}'")
 					do_write =False
-					time_diff =(my_datenow -my_sensordate).minutes
+					time_diff =(my_datenow -my_sensordate).total_seconds()
 					print(f"my_datenow ='{my_datenow}', my_sensordate ='{my_sensordate}', time_diff ='{time_diff}")
 
-					if abs(time_diff) >1:
+					if abs(time_diff) >180:
 						do_write =True
 						last_times[my_sensor] =my_datenow
 
