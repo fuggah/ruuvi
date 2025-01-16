@@ -26,7 +26,7 @@ sensors = {"C0:E7:B2:DD:8B:1A" : "Fence",
 	"EC:07:DA:3E:5F:F2" : "Freezer",
 	"D6:EC:67:41:9D:76" : "Fridge" }
 
-just_now =datetime.datetime.now(datetime.UTC)
+just_now =datetime.datetime.now()
 last_times = { "Fence" :just_now, "Mobile" : just_now, "Freezer" : just_now, "Fridge" : just_now } 
 
 measurement = [{"measurement": "ruuvi_measurements",
@@ -125,7 +125,7 @@ def on_message(client, userdata, msg):
 				if my_sensor is not None:
 					print(f"Sender = '{my_sensor}', Data = '{data}'")
 
-					my_datenow =datetime.datetime.now(datetime.UTC)
+					my_datenow =datetime.datetime.now()
 					my_sensordate =last_times[my_sensor]
 
 					do_write =False
