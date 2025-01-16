@@ -29,7 +29,7 @@ logFileHandler =logging.FileHandler("ruuviMQTT.log")
 logFileHandler.setLevel(logging.DEBUG)
 logger.addHandler(logFileHandler)
 logConsoleHandler =logging.StreamHandler(stream=sys.stdout)
-logConsoleHandler.setLeverl(logging.DEBUG)
+logConsoleHandler.setLevel(logging.DEBUG)
 logger.addHandler(logConsoleHandler)
 
 # my sensors
