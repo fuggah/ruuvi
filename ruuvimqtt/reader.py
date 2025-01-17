@@ -24,7 +24,7 @@ influx_password = "Rc20213005#"
 influx_database = "ruuvi"
 
 _logging_level =logging.DEBUG
-_logfile_name ="wxreport.log"
+_logfile_name ="reader.log"
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=_logging_level, filename = _logfile_name, format ='%(asctime)s: %(name)s: %(levelname)s - %(message)s')
