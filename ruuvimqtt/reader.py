@@ -23,10 +23,15 @@ influx_user = "ruuvicollector"
 influx_password = "Rc20213005#"
 influx_database = "ruuvi"
 
+_logging_level =logging.DEBUG
+_logfile_name ="wxreport.log"
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=_logging_level, filename = _logfile_name, format ='%(asctime)s: %(name)s: %(levelname)s - %(message)s')
+
 # set logging
-fmt = logging.Formatter("%(name)s: %(asctime)s | %(levelname)s | %(filename)s:%(lineno)s | %(process)d >>> %(message)s")
-logger = logging.getLogger("ruuviMQTT")
-logger.setLevel(logging.DEBUG)
+"""fmt = logging.Formatter("%(name)s: %(asctime)s | %(levelname)s | %(filename)s:%(lineno)s | %(process)d >>> %(message)s")
+ logger.setLevel(logging.DEBUG)
 logFileHandler =logging.FileHandler("ruuviMQTT.log")
 logFileHandler.setLevel(logging.DEBUG)
 logFileHandler.setFormatter(fmt)
@@ -35,7 +40,7 @@ logConsoleHandler =logging.StreamHandler(stream=sys.stdout)
 logConsoleHandler.setLevel(logging.DEBUG)
 logConsoleHandler.setFormatter(fmt)
 logger.addHandler(logConsoleHandler)
-
+ """
 # my sensors
 sensors = {"C0:E7:B2:DD:8B:1A" : "Fence",
 	"D9:27:7C:28:2F:E6" : "Mobile",
