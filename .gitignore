@@ -1,0 +1,6 @@
+ruuvimqtt/config.json
+.DS_Store
+.vscode/
+ruuvimqtt/.vscode/
+ruuvimqtt/ruuvi_decoders/
+
