@@ -1,0 +1,10 @@
+{
+    "host": "",
+    "port": 1883,
+    "sensor": "EC:07:DA:3E:5F:F2",
+    "uid": "",
+    "pwd": "",
+    "operator": "temperature",
+    "operand" : ">",
+    "value": -15
+}
