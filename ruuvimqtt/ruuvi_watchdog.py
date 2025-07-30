@@ -9,6 +9,7 @@ import datetime
 from datetime import date
 from time import gmtime
 import logging
+from queue import Queue
 import sys
 
 __DEBUG__ =True
@@ -22,6 +23,7 @@ _sensor =None
 _operand =None
 _operator =None
 _value =None
+_queue = Queue()
 
 _logging_level =logging.DEBUG
 _logfile_name ="ruuvi_watchdog.log"
@@ -127,50 +129,60 @@ def getMQTTSettings(fle):
 	
 # this is called every time in client.loop_forever when the subscribed message has been read from mq
 def on_message(client, userdata, msg):
-	_logger.debug(f"Received '{msg.payload.decode()}' from '{msg.topic}' topic")
-	data = json.loads(msg.payload.decode())
+	try:
+		myMsg =msg.payload.decode()
+		_logger.debug(f"Received '{myMsg}' from '{msg.topic}' topic")
+		data = json.loads(myMsg)
+		_queue.put(data)
+	except Exception as e:
+		_logger.error(f"Error '{e}' decoding message: '{msg.payload}'")
+
+def process_message(data):
 	data =data.get("data")
 	if data is not None:
-		try:
-			clean_data =data.split("FF9904")[1]
+		clean_data =data.split("FF9904")[1]
 
-			format = clean_data[0:2]
-			decoder =None
-			if "03" == format:
-				decoder =Df3Decoder()
-			elif "05" == format:
-				decoder =Df5Decoder()
+		format = clean_data[0:2]
+		decoder =None
+		if "03" == format:
+			decoder =Df3Decoder()
+		elif "05" == format:
+			decoder =Df5Decoder()
+		else:
+			_logger.error(f"Unknown data format: {format}")
+			return 1
+		
+		myData =None
+		myData = decoder.decode_data(clean_data)
+		if myData is not None:
+
+			_logger.debug(f"Got data: {myData}")
+
+			operator =myData[_operator]
+
+			_logger.debug(f"Checking condition: {operator} {_operand} {_value}")
+			res = eval(f"{operator} {_operand} {_value}")
+
+			_logger.debug(f"Condition result: {res}")
+
+			if True ==res:
+				_logger.info(f"Condition '{_operator}' '{_operand}' '{_value}' met for sensor '{_sensor}' with value: {operator}")
+				return 2
 			else:
-				_logger.error(f"Unknown data format: {format}")
-				return
-			
-			myData =None
-			myData = decoder.decode_data(clean_data)
-			if myData is not None:
+				_logger.info(f"Condition '{_operator}' '{_operand}' '{_value}' NOT met for sensor '{_sensor}' with value: {operator}")
 
-				_logger.debug(f"Got data: {myData}")
+		else:
+			_logger.error("Decoded data is None")
+			return 1
 
-				operator =myData[_operator]
-
-				_logger.debug(f"Checking condition: {operator} {_operand} {_value}")
-				res = eval(f"{operator} {_operand} {_value}")
-
-				_logger.debug(f"Condition result: {res}")
-
-			else:
-				_logger.error("Decoded data is None")
-
-		except (AttributeError, ValueError, TypeError):
-			_logger.error(f"Error --> {msg.payload}")
+	else:
+		_logger.error("No data found in message")
+		return 1
+	
+	return 0
 
 
 def connect_mqtt() -> mqtt_client:
-	def on_connect(client, userdata, flags, rc):
-		if rc == 0:
-			_logger.debug("Connected to MQTT Broker!")
-		else:
-			_logger.error("Failed to connect, return code %d\n", rc)
-			sys.exit(1)
 
 	# generate client ID with pub prefix randomly
 	client_id = f"ruuvimqtt-{random.randint(0, 100)}"
@@ -178,8 +190,12 @@ def connect_mqtt() -> mqtt_client:
 	client = mqtt_client.Client(client_id)
 
 	client.username_pw_set(_uid, _pwd)
-	client.on_connect = on_connect
-	client.connect(_host, _port)
+	try:
+		client.connect(_host, _port)
+	except Exception as e:
+		_logger.error(f"Failed to connect to MQTT broker at {_host}:{_port} with error: {e}")
+		client = None
+
 	return client
 
 def subscribe(client: mqtt_client):
@@ -188,11 +204,23 @@ def subscribe(client: mqtt_client):
 	client.subscribe(subscribed)
 	client.on_message = on_message
 
-
 def run():
 	client = connect_mqtt()
-	subscribe(client)
-	client.loop_forever()
+	if None ==client:
+		_logger.error("Failed to connect to MQTT broker. Exiting.")
+		res =1
+	else:
+		subscribe(client)
+		client.loop_start()
+
+		data =_queue.get()
+		res =process_message(data)
+
+		client.loop_stop()
+		client.disconnect()
+
+	_logger.debug(f"Process result: {res}")
+	return res
 
 if __name__ == '__main__':
 	_uid, _pwd, _host, _port, _sensor, _operand, _operator, _value = getMQTTSettings(_confFile)
@@ -200,5 +228,6 @@ if __name__ == '__main__':
 		_logger.error("MQTT settings are not properly configured.")
 		sys.exit(1)	
 
-	run()
+	sys.exit(run())
+	
 
