@@ -157,6 +157,8 @@ def run():
 	return res
 
 if __name__ == '__main__':
+	_confFile = _confFile if len(sys.argv) < 2 else sys.argv[1]
+	_logger.debug(f"Using configuration file: {_confFile}")
 	_uid, _pwd, _host, _port, _sensor, _operand, _operator, _value = getMQTTSettings(_confFile)
 	if _uid is None or _pwd is None or _host is None or _port is None or _sensor is None or _operand is None or _operator is None or _value is None:
 		_logger.error("MQTT settings are not properly configured.")
